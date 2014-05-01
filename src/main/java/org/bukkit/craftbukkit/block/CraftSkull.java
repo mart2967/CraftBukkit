@@ -1,6 +1,11 @@
 package org.bukkit.craftbukkit.block;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import com.google.common.base.Strings;
+import com.google.common.collect.Multiset.Entry;
 
 import net.minecraft.server.TileEntitySkull;
 
@@ -16,6 +21,8 @@ public class CraftSkull extends CraftBlockState implements Skull {
     private SkullType skullType;
     private byte rotation;
     private final int MAX_OWNER_LENGTH = 16;
+    private static HashMap<Integer, SkullType> idToSkullType;
+    private static HashMap<Byte, BlockFace> idToBlockFace;
 
     public CraftSkull(final Block block) {
         super(block);
@@ -25,118 +32,76 @@ public class CraftSkull extends CraftBlockState implements Skull {
         player = skull.getExtraType();
         skullType = getSkullType(skull.getSkullType());
         rotation = (byte) skull.getRotation();
+
+        idToSkullType = new HashMap<Integer, SkullType>();
+        idToSkullType.put(0, SkullType.SKELETON);
+        idToSkullType.put(1, SkullType.WITHER);
+        idToSkullType.put(2, SkullType.ZOMBIE);
+        idToSkullType.put(3, SkullType.PLAYER);
+        idToSkullType.put(4, SkullType.CREEPER);
+
+        idToBlockFace = new HashMap<Byte, BlockFace>();
+        idToBlockFace.put((byte) 0, BlockFace.NORTH);
+        idToBlockFace.put((byte) 1, BlockFace.NORTH_NORTH_EAST);
+        idToBlockFace.put((byte) 2, BlockFace.NORTH_EAST);
+        idToBlockFace.put((byte) 3, BlockFace.EAST_NORTH_EAST);
+        idToBlockFace.put((byte) 4, BlockFace.EAST);
+        idToBlockFace.put((byte) 5, BlockFace.EAST_SOUTH_EAST);
+        idToBlockFace.put((byte) 6, BlockFace.SOUTH_EAST);
+        idToBlockFace.put((byte) 7, BlockFace.SOUTH_SOUTH_EAST);
+        idToBlockFace.put((byte) 8, BlockFace.SOUTH);
+        idToBlockFace.put((byte) 9, BlockFace.SOUTH_SOUTH_WEST);
+        idToBlockFace.put((byte) 10, BlockFace.SOUTH_WEST);
+        idToBlockFace.put((byte) 11, BlockFace.WEST_SOUTH_WEST);
+        idToBlockFace.put((byte) 12, BlockFace.WEST);
+        idToBlockFace.put((byte) 13, BlockFace.WEST_NORTH_WEST);
+        idToBlockFace.put((byte) 14, BlockFace.NORTH_WEST);
+        idToBlockFace.put((byte) 15, BlockFace.NORTH_NORTH_WEST);
+    }
+
+    // TODO: test this to see if it works!: :#3
+    public static <E, T> Object getIdFromObject(HashMap<T, E> map, E value) {
+        Iterator<Map.Entry<T, E>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<T, E> entry = iterator.next();
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
+            }
+        }
+        throw new AssertionError(value);
     }
 
     static SkullType getSkullType(int id) {
-        switch (id) {
-            case 0:
-                return SkullType.SKELETON;
-            case 1:
-                return SkullType.WITHER;
-            case 2:
-                return SkullType.ZOMBIE;
-            case 3:
-                return SkullType.PLAYER;
-            case 4:
-                return SkullType.CREEPER;
-            default:
-                throw new AssertionError(id);
+        SkullType result = idToSkullType.get(id);
+        if (result != null) {
+            return result;
         }
+        throw new AssertionError(id);
     }
 
     static int getSkullType(SkullType type) {
-        switch(type) {
-            case SKELETON:
-                return 0;
-            case WITHER:
-                return 1;
-            case ZOMBIE:
-                return 2;
-            case PLAYER:
-                return 3;
-            case CREEPER:
-                return 4;
-            default:
-                throw new AssertionError(type);
+        Integer result = (Integer) getIdFromObject(idToSkullType, type);
+        if (result != null) {
+            return result;
         }
+        throw new AssertionError(type);
     }
 
     static byte getBlockFace(BlockFace rotation) {
-        switch (rotation) {
-            case NORTH:
-                return 0;
-            case NORTH_NORTH_EAST:
-                return 1;
-            case NORTH_EAST:
-                return 2;
-            case EAST_NORTH_EAST:
-                return 3;
-            case EAST:
-                return 4;
-            case EAST_SOUTH_EAST:
-                return 5;
-            case SOUTH_EAST:
-                return 6;
-            case SOUTH_SOUTH_EAST:
-                return 7;
-            case SOUTH:
-                return 8;
-            case SOUTH_SOUTH_WEST:
-                return 9;
-            case SOUTH_WEST:
-                return 10;
-            case WEST_SOUTH_WEST:
-                return 11;
-            case WEST:
-                return 12;
-            case WEST_NORTH_WEST:
-                return 13;
-            case NORTH_WEST:
-                return 14;
-            case NORTH_NORTH_WEST:
-                return 15;
-            default:
-                throw new IllegalArgumentException("Invalid BlockFace rotation: " + rotation);
+        Byte result = (Byte) getIdFromObject(idToBlockFace, rotation);
+        if(result != null){
+            return result;
         }
+        throw new IllegalArgumentException("Invalid BlockFace rotation: " + rotation);
+        
     }
 
     static BlockFace getBlockFace(byte rotation) {
-        switch (rotation) {
-            case 0:
-                return BlockFace.NORTH;
-            case 1:
-                return BlockFace.NORTH_NORTH_EAST;
-            case 2:
-                return BlockFace.NORTH_EAST;
-            case 3:
-                return BlockFace.EAST_NORTH_EAST;
-            case 4:
-                return BlockFace.EAST;
-            case 5:
-                return BlockFace.EAST_SOUTH_EAST;
-            case 6:
-                return BlockFace.SOUTH_EAST;
-            case 7:
-                return BlockFace.SOUTH_SOUTH_EAST;
-            case 8:
-                return BlockFace.SOUTH;
-            case 9:
-                return BlockFace.SOUTH_SOUTH_WEST;
-            case 10:
-                return BlockFace.SOUTH_WEST;
-            case 11:
-                return BlockFace.WEST_SOUTH_WEST;
-            case 12:
-                return BlockFace.WEST;
-            case 13:
-                return BlockFace.WEST_NORTH_WEST;
-            case 14:
-                return BlockFace.NORTH_WEST;
-            case 15:
-                return BlockFace.NORTH_NORTH_WEST;
-            default:
-                throw new AssertionError(rotation);
+        BlockFace result = idToBlockFace.get(rotation);
+        if (result != null) {
+            return result;
         }
+        throw new IllegalArgumentException("Invalid BlockFace rotation: "+ rotation);
     }
 
     public boolean hasOwner() {
@@ -161,7 +126,7 @@ public class CraftSkull extends CraftBlockState implements Skull {
     }
 
     public BlockFace getRotation() {
-    	return getBlockFace(rotation);
+        return getBlockFace(rotation);
     }
 
     public void setRotation(BlockFace rotation) {

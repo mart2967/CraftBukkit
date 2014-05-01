@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit.event;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,9 +77,7 @@ import org.bukkit.inventory.meta.BookMeta;
 public class CraftEventFactory {
     public static final DamageSource MELTING = CraftDamageSource.copyOf(DamageSource.BURN);
     public static final DamageSource POISON = CraftDamageSource.copyOf(DamageSource.MAGIC);
-    
-    static HashMap<DamageSource, DamageCause> sourceToCause = initializeSourceToCauseMap();//new HashMap<DamageSource, DamageCause>();
-    
+
     // helper methods
     private static boolean canBuild(CraftWorld world, Player player, int x, int z) {
         WorldServer worldServer = world.getHandle();
@@ -95,20 +92,6 @@ public class CraftEventFactory {
 
         int distanceFromSpawn = Math.max(Math.abs(x - chunkcoordinates.x), Math.abs(z - chunkcoordinates.z));
         return distanceFromSpawn > spawnSize;
-    }
-
-    private static HashMap<DamageSource, DamageCause> initializeSourceToCauseMap() {
-        HashMap<DamageSource, DamageCause> data = new HashMap<DamageSource, DamageCause>();
-        data.put(DamageSource.FIRE, DamageCause.FIRE);
-        data.put(DamageSource.STARVE, DamageCause.STARVATION);
-        data.put(DamageSource.WITHER, DamageCause.WITHER);
-        data.put(DamageSource.STUCK, DamageCause.SUFFOCATION);
-        data.put(DamageSource.DROWN, DamageCause.DROWNING);
-        data.put(DamageSource.BURN, DamageCause.FIRE_TICK);
-        data.put(MELTING, DamageCause.MELTING);
-        data.put(POISON, DamageCause.POISON);
-        data.put(DamageSource.MAGIC, DamageCause.MAGIC);
-        return data;
     }
 
     public static <T extends Event> T callEvent(T event) {
@@ -436,10 +419,27 @@ public class CraftEventFactory {
             return event;
         }
 
-        
         DamageCause cause = null;
-        cause = sourceToCause.get(source);
-        
+        if (source == DamageSource.FIRE) {
+            cause = DamageCause.FIRE;
+        } else if (source == DamageSource.STARVE) {
+            cause = DamageCause.STARVATION;
+        } else if (source == DamageSource.WITHER) {
+            cause = DamageCause.WITHER;
+        } else if (source == DamageSource.STUCK) {
+            cause = DamageCause.SUFFOCATION;
+        } else if (source == DamageSource.DROWN) {
+            cause = DamageCause.DROWNING;
+        } else if (source == DamageSource.BURN) {
+            cause = DamageCause.FIRE_TICK;
+        } else if (source == MELTING) {
+            cause = DamageCause.MELTING;
+        } else if (source == POISON) {
+            cause = DamageCause.POISON;
+        } else if (source == DamageSource.MAGIC) {
+            cause = DamageCause.MAGIC;
+        }
+
         if (cause != null) {
             return callEntityDamageEvent(null, entity, cause, damage);
         }
